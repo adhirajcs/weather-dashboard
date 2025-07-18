@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, throwError } from 'rxjs';
-import { environment } from '../../environments/environment';
 import { WeatherData } from '../interfaces/weather-data';
 
 @Injectable({
@@ -9,15 +8,18 @@ import { WeatherData } from '../interfaces/weather-data';
 })
 export class WeatherService {
   private http = inject(HttpClient);
-  private readonly apiKey = environment.WEATHER_API_KEY;
-  private readonly baseUrl = environment.WEATHER_API_BASE_URL;
 
+  /**
+   * Gets weather data for the specified location by calling the server-side proxy
+   * This approach keeps the API key secure on the server
+   */
   getWeatherByLocation(location: string): Observable<WeatherData> {
     if (!location.trim()) {
       return throwError(() => new Error('Please enter a location'));
     }
 
-    const url = `${this.baseUrl}?q=${encodeURIComponent(location)}&units=metric&appid=${this.apiKey}`;
+    // Call our server-side endpoint instead of the OpenWeather API directly
+    const url = `/api/weather?location=${encodeURIComponent(location)}`;
 
     return this.http.get<WeatherData>(url).pipe(
       catchError(error => {
@@ -31,10 +33,16 @@ export class WeatherService {
     );
   }
 
+  /**
+   * Returns the URL for a weather icon
+   */
   getWeatherIconUrl(icon: string): string {
     return `http://openweathermap.org/img/wn/${icon}@2x.png`;
   }
 
+  /**
+   * Formats a timestamp with timezone offset into a readable time
+   */
   formatTimestamp(timestamp: number, timezone: number): string {
     const date = new Date((timestamp + timezone) * 1000);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
