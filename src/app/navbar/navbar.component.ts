@@ -53,6 +53,6 @@ export class NavbarComponent {
     this.showTooltip = true;
     setTimeout(() => {
       this.showTooltip = false;
-    }, 3000);
+    }, 2000);
   }
 }
