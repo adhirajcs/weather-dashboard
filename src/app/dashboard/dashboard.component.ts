@@ -38,6 +38,8 @@ export class DashboardComponent {
       return;
     }
 
+    this.weatherData = null
+
     this.loading = true;
     this.error = '';
     clearTimeout(this.errorTimeout);
@@ -53,6 +55,7 @@ export class DashboardComponent {
           this.weatherData = data;
         },
         error: (err) => {
+          this.weatherData = null
           this.showError(err.message);
         }
       });

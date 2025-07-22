@@ -25,9 +25,11 @@ export class NavbarComponent {
   showTooltip = false;
 
   copyUrlToClipboard(): void {
-    const url = window.location.href;
+    const location = 'kolkata';
+    const apiUrl = `${window.location.origin}/api/weather?location=${encodeURIComponent(location)}`;
+  
     if (navigator.clipboard) {
-      navigator.clipboard.writeText(url)
+      navigator.clipboard.writeText(apiUrl)
         .then(() => {
           console.log('URL copied to clipboard successfully!');
           this.displayTooltip();
@@ -35,7 +37,7 @@ export class NavbarComponent {
         .catch(err => console.error('Failed to copy URL: ', err));
     } else {
       const textarea = document.createElement('textarea');
-      textarea.value = url;
+      textarea.value = apiUrl;
       document.body.appendChild(textarea);
       textarea.select();
       try {
