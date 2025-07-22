@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, HostListener, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { CommonModule } from '@angular/common';
+import { WeatherService } from '../services/weather.service';
 
 @Component({
   selector: 'app-navbar',
@@ -13,28 +14,43 @@ import { CommonModule } from '@angular/common';
     trigger('fadeInOut', [
       transition(':enter', [
         style({ opacity: 0, transform: 'translateY(-10px)' }),
-        animate('200ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
+        animate('200ms ease-out',style({ opacity: 1, transform: 'translateY(0)' })),
       ]),
       transition(':leave', [
-        animate('200ms ease-in', style({ opacity: 0, transform: 'translateY(-10px)' }))
-      ])
-    ])
-  ]
+        animate('200ms ease-in',style({ opacity: 0, transform: 'translateY(-10px)' })),
+      ]),
+    ]),
+  ],
 })
 export class NavbarComponent {
   showTooltip = false;
+  private tooltipTimeout: any
+  private weatherService = inject(WeatherService);
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    if (this.showTooltip) {
+      const tooltipElement = document.querySelector('.fixed.top-6');
+      if (tooltipElement && !tooltipElement.contains(event.target as Node)) {
+        this.showTooltip = false;
+        clearTimeout(this.tooltipTimeout);
+      }
+    }
+  }
 
   copyUrlToClipboard(): void {
-    const location = 'kolkata';
-    const apiUrl = `${window.location.origin}/api/weather?location=${encodeURIComponent(location)}`;
-  
+    // Get the relative URL from WeatherService then prepend window.location.origin
+    const relativeUrl = this.weatherService.getWeatherApiUrl();
+    const apiUrl = `${window.location.origin}${relativeUrl}`;
+
     if (navigator.clipboard) {
-      navigator.clipboard.writeText(apiUrl)
+      navigator.clipboard
+        .writeText(apiUrl)
         .then(() => {
-          console.log('URL copied to clipboard successfully!');
+          console.log('URL copied to clipboard successfully!', apiUrl);
           this.displayTooltip();
         })
-        .catch(err => console.error('Failed to copy URL: ', err));
+        .catch((err) => console.error('Failed to copy URL: ', err));
     } else {
       const textarea = document.createElement('textarea');
       textarea.value = apiUrl;
@@ -42,7 +58,7 @@ export class NavbarComponent {
       textarea.select();
       try {
         document.execCommand('copy');
-        console.log('URL copied to clipboard successfully!');
+        console.log('URL copied to clipboard successfully!', apiUrl);
         this.displayTooltip();
       } catch (err) {
         console.error('Failed to copy URL: ', err);
@@ -53,7 +69,7 @@ export class NavbarComponent {
 
   displayTooltip(): void {
     this.showTooltip = true;
-    setTimeout(() => {
+    this.tooltipTimeout = setTimeout(() => {
       this.showTooltip = false;
     }, 2000);
   }

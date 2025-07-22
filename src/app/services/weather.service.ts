@@ -8,6 +8,7 @@ import { WeatherData } from '../interfaces/weather-data';
 })
 export class WeatherService {
   private http = inject(HttpClient);
+  private currentLocation = "";
 
   /**
    * Gets weather data for the specified location by calling the server-side proxy
@@ -17,6 +18,9 @@ export class WeatherService {
     if (!location.trim()) {
       return throwError(() => new Error('Please enter a location'));
     }
+
+    // Store the current location so other components can access it
+    this.currentLocation = location;
 
     // Call our server-side endpoint instead of the OpenWeather API directly
     const url = `/api/weather?location=${encodeURIComponent(location)}`;
@@ -43,6 +47,20 @@ export class WeatherService {
    */
   getWeatherIconUrl(icon: string): string {
     return `http://openweathermap.org/img/wn/${icon}@2x.png`;
+  }
+
+  /**
+   * Returns the relative API URL for weather data
+   */
+  getWeatherApiUrl(): string {
+    return `/api/weather?location=${encodeURIComponent(this.currentLocation)}`;
+  }
+
+  /**
+   * Clears the stored location
+   */
+  clearCurrentLocation(): void {
+    this.currentLocation = "";
   }
 
   /**

@@ -12,6 +12,7 @@ import { WeatherData } from '../interfaces/weather-data';
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
+
 export class DashboardComponent {
   searchLocation = '';
   weatherData: WeatherData | null = null;
@@ -34,6 +35,8 @@ export class DashboardComponent {
 
   searchWeather() {
     if (!this.searchLocation.trim()) {
+      this.weatherData = null;
+      this.weatherService.clearCurrentLocation()
       this.showError('Please enter a location');
       return;
     }
