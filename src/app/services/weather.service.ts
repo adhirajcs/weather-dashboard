@@ -4,7 +4,7 @@ import { Observable, catchError, throwError } from 'rxjs';
 import { WeatherData } from '../interfaces/weather-data';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class WeatherService {
   private http = inject(HttpClient);
@@ -22,12 +22,17 @@ export class WeatherService {
     const url = `/api/weather?location=${encodeURIComponent(location)}`;
 
     return this.http.get<WeatherData>(url).pipe(
-      catchError(error => {
+      catchError((error) => {
         if (error.status === 404) {
-          return throwError(() => new Error('Location not found. Please try again.'));
+          return throwError(
+            () => new Error('Location not found. Please try again.')
+          );
         } else {
           console.error('API Error:', error);
-          return throwError(() => new Error('Error fetching weather data. Please try again later.'));
+          return throwError(
+            () =>
+              new Error('Error fetching weather data. Please try again later.')
+          );
         }
       })
     );
@@ -44,7 +49,16 @@ export class WeatherService {
    * Formats a timestamp with timezone offset into a readable time
    */
   formatTimestamp(timestamp: number, timezone: number): string {
-    const date = new Date((timestamp + timezone) * 1000);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    // timestamp is in seconds UTC, timezone is offset in seconds
+    // build a UTC‐based date at the shifted moment, then format as UTC
+    const utcMs = timestamp * 1000;
+    const offsetMs = timezone * 1000;
+    const date = new Date(utcMs + offsetMs);
+    return date.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+      timeZone: 'UTC',
+    });
   }
 }

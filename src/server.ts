@@ -50,7 +50,7 @@ app.get('/api/weather', (req, res) => {
   fetch(
     `${baseUrl}?q=${location}&units=metric&appid=${apiKey}`,
   )
-    .then((response) => {
+    .then( async (response) => {
       // Store the status code before parsing JSON
       const status = response.status;
       return response.json().then((data) => {
